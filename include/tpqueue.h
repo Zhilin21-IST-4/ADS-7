@@ -5,7 +5,6 @@
 
 template<typename T>
 class TPQueue {
-  // реализация шаблона очереди с приоритетом на связанном списке
  public:
       TPQueue(): head(nullptr), tail(nullptr) {}
       void push(const T&);
