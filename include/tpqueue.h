@@ -5,70 +5,78 @@
 
 template<typename T>
 class TPQueue {
- private:
-  struct ITEM {
-    T value;
-    ITEM* next, * previous;
-  };
-  ITEM* start, * end;
-  TPQueue::ITEM* create(const T& value) {
-    ITEM* item = new ITEM;
-    item->value = value;
-    item->next = item->previous = nullptr;
-    return item;
-}
-  
+  // реализация шаблона очереди с приоритетом на связанном списке
  public:
-  TPQueue() : start(nullptr), end(nullptr) {}
-  T pop();
-  void push(const T& value);
+      TPQueue(): head(nullptr), tail(nullptr) {}
+      void push(const T&);
+      T pop();
+ private:
+      struct ITEM {
+          T value;
+          ITEM *next;
+          ITEM *prew;
+      };
+      TPQueue:: ITEM *create(const T&);
+      ITEM *head;
+      ITEM *tail;
 };
 
 template<typename T>
-T TPQueue<T>:: pop() {
-  if (start && end) {
-    ITEM* temp = start->next;
-    if (temp) {
-      temp->previous = nullptr;
-    }
-    T value = start->value;
-    delete start;
-    start = temp;
-    if (!start) {
-      end = nullptr;
-    }
-  return value;
+typename TPQueue<T>::ITEM *TPQueue<T>::create(const T& value) {
+  ITEM * temp = new ITEM;
+  temp->value = value;
+  temp->next = nullptr;
+  temp->prew = nullptr;
+  return temp;
+}
+
+template<typename T>
+void TPQueue <T>::push(const T& data) {
+  ITEM *temp = head;
+  ITEM* item = create(data);
+  while (temp && temp->value.prior >= data.prior) {
+    temp = temp->next;
+  }
+  if (!temp && head) {
+    tail ->next = item;
+    item->prew = tail;
+    tail = item;
+  } else if (!temp && !head) {
+    head = tail = item;
+  } else if (!temp->prew) {
+    head->prew = item;
+    item->next = head;
+    head = item;
   } else {
-    throw std::string("Queue empty");
+    temp->prew->next = item;
+    item->prew = temp->prew;
+    item->next = temp;
+    temp->prew = item;
   }
 }
 
 template<typename T>
-void TPQueue<T>:: push(const T& value) {
-  ITEM* temp = start;
-  ITEM* item = create(value);
-  while (temp && temp->value.prior >= value.prior)
-    temp = temp->next;
-    if (!temp && start) {
-      end->next = item;
-      item->previous = end;
-      end = item;
-    } else if (!temp && !start) {
-      start = end = item;
-    } else if (!temp->previous) {
-      start->previous = item;
-      item->next = start;
-      start = item;
-    } else {
-      temp->previous->next = item;
-      item->previous = temp->previous;
-      item->next = temp;
-      temp->previous = item;
+T TPQueue<T>::pop() {
+  if (head && tail) {
+    ITEM* temp = head->next;
+    if (temp) {
+      temp->prew = nullptr;
     }
+    T data = head->value;
+    delete head;
+    head = temp;
+    if (!head) {
+      tail = nullptr;
+    }
+    return data;
+  } else {
+    throw std::string("Is Empty!");
+  }
 }
 
 struct SYM {
   char ch;
   int prior;
 };
+
 #endif  // INCLUDE_TPQUEUE_H_
